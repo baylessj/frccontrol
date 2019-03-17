@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 
 
-def kalmd(sys, Q, R):
+cdef public kalmd(sys, Q, R):
     """Solves for the steady state kalman gain and error covariance matrices.
 
     Keyword arguments:

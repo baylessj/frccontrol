@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 
 
-def lqr(sys, Q, R):
+cdef public lqr(sys, Q, R):
     """Solves for the optimal linear-quadratic regulator (LQR).
 
     For a continuous system:

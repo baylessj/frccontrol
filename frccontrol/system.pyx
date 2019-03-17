@@ -13,7 +13,7 @@ from . import lqr
 from . import system_writer
 
 
-class System:
+cdef public class System[object c_System, type c_System_t]:
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, states, u_min, u_max, dt, nonlinear=False):
@@ -59,7 +59,7 @@ class System:
 
     __default = object()
 
-    def update(self, next_r=__default):
+    cdef update(self, next_r=__default):
         """Advance the model by one timestep.
 
         Keyword arguments:
@@ -77,12 +77,12 @@ class System:
 
         self.predict_observer()
 
-    def update_plant(self):
+    cdef update_plant(self):
         """Advance the model by one timestep."""
         self.x = self.sysd.A @ self.x + self.sysd.B @ self.u
         self.y = self.sysd.C @ self.x + self.sysd.D @ self.u
 
-    def predict_observer(self):
+    cdef predict_observer(self):
         """Runs the predict step of the observer update.
 
         In one update step, this should be run after correct_observer().
@@ -92,7 +92,7 @@ class System:
         if self.nonlinear:
             self.P = self.sysd.A @ self.P @ self.sysd.A.T + self.Q
 
-    def correct_observer(self):
+    cdef correct_observer(self):
         """Runs the correct step of the observer update.
 
         In one update step, this should be run before predict_observer().
@@ -110,7 +110,7 @@ class System:
             self.y - self.sysd.C @ self.x_hat - self.sysd.D @ self.u
         )
 
-    def update_controller(self, next_r=__default):
+    cdef update_controller(self, next_r=__default):
         """Advance the controller by one timestep.
 
         Keyword arguments:
@@ -140,7 +140,7 @@ class System:
     def design_controller_observer(self):
         pass
 
-    def design_lqr(self, Q_elems, R_elems):
+    cdef design_lqr(self, Q_elems, R_elems):
         """Design a discrete time linear-quadratic regulator for the system.
 
         Keyword arguments:
@@ -153,7 +153,7 @@ class System:
         R = self.__make_cost_matrix(R_elems)
         self.K = lqr(self.sysd, Q, R)
 
-    def place_controller_poles(self, poles):
+    cdef place_controller_poles(self, poles):
         """Design a controller that places the closed-loop system poles at the
         given locations.
 
@@ -166,7 +166,7 @@ class System:
         """
         self.K = cnt.place(self.sysd.A, self.sysd.B, poles)
 
-    def design_kalman_filter(self, Q_elems, R_elems):
+    cdef design_kalman_filter(self, Q_elems, R_elems):
         """Design a discrete time Kalman filter for the system.
 
         Keyword arguments:
@@ -192,7 +192,7 @@ class System:
             self.Q = M[m:, m:] @ M[:m, m:]
             self.R = 1 / self.sysd.dt * self.R
 
-    def place_observer_poles(self, poles):
+    cdef place_observer_poles(self, poles):
         """Design a controller that places the closed-loop system poles at the
         given locations.
 
@@ -206,7 +206,7 @@ class System:
         L = cnt.place(self.sysd.A.T, self.sysd.C.T, poles).T
         self.kalman_gain = np.linalg.inv(self.sysd.A) @ L
 
-    def design_two_state_feedforward(self, Q_elems=None, R_elems=None):
+    cdef design_two_state_feedforward(self, Q_elems=None, R_elems=None):
         """Computes the feedforward constant for a two-state controller.
 
         This will take the form u = K_ff * (r_{n+1} - A r_n), where K_ff is the
@@ -235,7 +235,7 @@ class System:
             # Moore-Penrose pseudoinverse of B.
             self.Kff = np.linalg.pinv(self.sysd.B)
 
-    def plot_pzmaps(self):
+    cdef plot_pzmaps(self):
         """Plots pole-zero maps of open-loop system, closed-loop system, and
         observer poles.
         """
@@ -265,7 +265,7 @@ class System:
 
         plt.tight_layout()
 
-    def extract_row(self, buf, idx):
+    cdef extract_row(self, buf, idx):
         """Extract row from 2D array.
 
         Keyword arguments:
@@ -277,7 +277,7 @@ class System:
         """
         return np.squeeze(np.asarray(buf[idx, :]))
 
-    def generate_time_responses(self, t, refs):
+    cdef generate_time_responses(self, t, refs):
         """Generate time-domain responses of the system and the control inputs.
 
         Returns:
@@ -305,7 +305,7 @@ class System:
 
         return x_rec, ref_rec, u_rec
 
-    def plot_time_responses(self, t, x_rec, ref_rec, u_rec):
+    cdef plot_time_responses(self, t, x_rec, ref_rec, u_rec):
         """Plots time-domain responses of the system and the control inputs.
 
         Keyword arguments:
@@ -331,7 +331,7 @@ class System:
             plt.legend()
         plt.xlabel("Time (s)")
 
-    def set_plot_labels(self, state_labels, u_labels):
+    cdef set_plot_labels(self, state_labels, u_labels):
         """Sets label data for time-domain response plots.
 
         Keyword arguments:
@@ -341,7 +341,7 @@ class System:
         self.state_labels = [x[0] + " (" + x[1] + ")" for x in state_labels]
         self.u_labels = [x[0] + " (" + x[1] + ")" for x in u_labels]
 
-    def __make_cost_matrix(self, elems):
+    cdef __make_cost_matrix(self, elems):
         """Creates a cost matrix from the given vector for use with LQR.
 
         The cost matrix is constructed using Bryson's rule. The inverse square
@@ -359,7 +359,7 @@ class System:
         """
         return np.diag(1.0 / np.square(elems))
 
-    def __make_cov_matrix(self, elems):
+    cdef __make_cov_matrix(self, elems):
         """Creates a covariance matrix from the given vector for use with Kalman
         filters.
 
@@ -376,7 +376,7 @@ class System:
         """
         return np.diag(np.square(elems))
 
-    def export_cpp_coeffs(
+    cdef export_cpp_coeffs(
         self,
         class_name,
         header_path_prefix="",

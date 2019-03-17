@@ -2,10 +2,8 @@ import control as cnt
 import numpy as np
 
 
-class DcBrushedMotor:
-    def __init__(
-        self, nominal_voltage, stall_torque, stall_current, free_current, free_speed
-    ):
+cdef public class DcBrushedMotor[object c_DcBrushedMotor, type c_DcBrushedMotor_t]:
+    def __init__(self, nominal_voltage, stall_torque, stall_current, free_current, free_speed):
         """Holds the constants for a DC brushed motor.
 
         Keyword arguments:
@@ -58,7 +56,7 @@ MOTOR_AM_9015 = DcBrushedMotor(12.0, 0.36, 71.0, 3.7, 14270.0)
 MOTOR_BB_RS550 = DcBrushedMotor(12.0, 0.38, 84.0, 0.4, 19000.0)
 
 
-def gearbox(motor, num_motors):
+cdef public gearbox(motor, num_motors):
     """Returns a DcBrushedMotor with the same characteristics as the specified
     number of motors in a gearbox.
     """
@@ -71,7 +69,7 @@ def gearbox(motor, num_motors):
     )
 
 
-def elevator(motor, num_motors, m, r, G):
+cdef public elevator(motor, num_motors, m, r, G):
     """Returns the state-space model for an elevator.
 
     States: [[position], [velocity]]
@@ -102,7 +100,7 @@ def elevator(motor, num_motors, m, r, G):
     return cnt.ss(A, B, C, D)
 
 
-def flywheel(motor, num_motors, J, G):
+cdef public flywheel(motor, num_motors, J, G):
     """Returns the state-space model for a flywheel.
 
     States: [[angular velocity]]
@@ -128,7 +126,7 @@ def flywheel(motor, num_motors, J, G):
     return cnt.ss(A, B, C, D)
 
 
-def drivetrain(motor, num_motors, m, r, rb, J, Gl, Gr):
+cdef public drivetrain(motor, num_motors, m, r, rb, J, Gl, Gr):
     """Returns the state-space model for a drivetrain.
 
     States: [[left position], [left velocity],
@@ -173,7 +171,7 @@ def drivetrain(motor, num_motors, m, r, rb, J, Gl, Gr):
     return cnt.ss(A, B, C, D)
 
 
-def single_jointed_arm(motor, num_motors, J, G):
+cdef public single_jointed_arm(motor, num_motors, J, G):
     """Returns the state-space model for a single-jointed arm.
 
     States: [[angle, angular velocity]]

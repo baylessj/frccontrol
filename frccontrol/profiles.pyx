@@ -1,7 +1,7 @@
 import math
 
 
-def generate_trapezoid_profile(max_v, time_to_max_v, dt, goal):
+cdef public generate_trapezoid_profile(max_v, time_to_max_v, dt, goal):
     """Creates a trapezoid profile with the given constraints.
 
     Returns:
@@ -58,7 +58,7 @@ def generate_trapezoid_profile(max_v, time_to_max_v, dt, goal):
     return t_rec, x_rec, v_rec, a_rec
 
 
-def generate_s_curve_profile(max_v, max_a, time_to_max_a, dt, goal):
+cdef public generate_s_curve_profile(max_v, max_a, time_to_max_a, dt, goal):
     """Returns an s-curve profile with the given constraints.
 
     Returns:
